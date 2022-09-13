@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using TaleWorlds.CampaignSystem;
+using TaleWorlds.CampaignSystem.CampaignBehaviors.AiBehaviors;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
 
@@ -16,7 +13,13 @@ namespace BasicFixes
             CampaignGameStarter campaignGameStarter = starter as CampaignGameStarter;
             if(campaignGameStarter != null)
             {
-                campaignGameStarter.AddBehavior(new DiscardEscessiveItemsBehavior());
+                campaignGameStarter.AddBehavior(new DiscardExcessiveItemsBehavior());
+
+                // remove bad AIVisitSettlementBehavior
+                AiVisitSettlementBehavior badBehavior = campaignGameStarter.CampaignBehaviors.FirstOrDefault(x => x is AiVisitSettlementBehavior) as AiVisitSettlementBehavior;
+                if(badBehavior != null)
+                    campaignGameStarter.RemoveBehavior(badBehavior);
+                campaignGameStarter.AddBehavior(new AiVisitSettlementBehaviorFixed());
             }
         }
     }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.MapEvents;
@@ -16,9 +14,9 @@ namespace BasicFixes
     /// This campaign behavior makes sure that ai parties don't kill their speed by becoming overburdened.
     /// Either 1 the ai party needs to be prevented from taking on too much weight, or 2 the excess 
     /// weight needs to be taken away soon after it is gained. I'm going for option 2 since option 
-    /// 1 would involve patching BattleCampaignBehavior.CollectLoots
+    /// 1 would involve patching BattleCampaignBehavior.CollectLoots.
     /// </summary>
-    public class DiscardEscessiveItemsBehavior : CampaignBehaviorBase
+    public class DiscardExcessiveItemsBehavior : CampaignBehaviorBase
     {
         public override void RegisterEvents()
         {
@@ -33,7 +31,8 @@ namespace BasicFixes
 
         /// <summary>
         /// Removed excess food from mobile party by reducing the greatest single food by 10% until 
-        /// the party is either no longer overburdened, or 
+        /// the party is either no longer overburdened or party would soon starve if more food is 
+        /// removed.
         /// </summary>
         /// <param name="mobileParty"></param>
         private void RemoveExcessFood(MobileParty mobileParty)
@@ -90,7 +89,8 @@ namespace BasicFixes
 
         /// <summary>
         /// This tries to take food from a mobile party that is for whatever reason overburdened 
-        /// until the party is no longer overburdened.
+        /// until the party is no longer overburdened. Should fix parties that are in the save 
+        /// data and are overburdened.
         /// </summary>
         /// <param name="mobileParty"></param>
         private void HourlyTickPartyEvent(MobileParty mobileParty)

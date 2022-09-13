@@ -306,6 +306,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DiscardEscessiveItemsBehavior.cs" />
+    <Compile Include="AiVisitSettlementBehaviorFixed.cs" />
     <Compile Include="SubModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
