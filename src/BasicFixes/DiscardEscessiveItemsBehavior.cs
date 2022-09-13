@@ -37,6 +37,9 @@ namespace BasicFixes
         /// <param name="mobileParty"></param>
         private void RemoveExcessFood(MobileParty mobileParty)
         {
+            if (mobileParty.TotalFoodAtInventory == 0)
+                return;
+
             // calculate excess weight
             float extraWeight = mobileParty.TotalWeightCarried - mobileParty.InventoryCapacity;
 
