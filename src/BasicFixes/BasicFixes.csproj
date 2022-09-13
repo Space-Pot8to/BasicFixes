@@ -305,6 +305,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CaravansCampaignBehaviorFix.cs" />
     <Compile Include="DiscardEscessiveItemsBehavior.cs" />
     <Compile Include="AiVisitSettlementBehaviorFixed.cs" />
     <Compile Include="SubModule.cs" />
