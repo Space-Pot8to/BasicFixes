@@ -9,6 +9,8 @@ using TaleWorlds.MountAndBlade;
 using Helpers;
 using TaleWorlds.ModuleManager;
 
+using HarmonyLib;
+
 namespace BasicFixes
 {
     public class SubModule : MBSubModuleBase
@@ -16,6 +18,16 @@ namespace BasicFixes
         private bool enableDiscardFood = true;
         private bool enableRecruitFix = true;
         private bool enableCaravanFix = true;
+        private bool enableFormationFix = true;
+
+        public Harmony HarmonyInstance;
+
+        protected override void OnSubModuleLoad()
+        {
+            base.OnSubModuleLoad();
+
+            HarmonyInstance = new Harmony("mod.harmony.BasicFixes");
+        }
 
         protected override void InitializeGameStarter(Game game, IGameStarter starter)
         {
@@ -41,6 +53,10 @@ namespace BasicFixes
                         {
                             enableCaravanFix = bool.Parse(node.InnerText);
                         }
+                        else if(node.Name == "FormationFix")
+                        {
+                            enableFormationFix = bool.Parse(node.InnerText);
+                        }
                     }
                 }
 
@@ -57,10 +73,24 @@ namespace BasicFixes
                 }
 
                 if (enableCaravanFix)
-                {
                     campaignGameStarter.AddBehavior(new CaravansCampaignBehaviorFix());
+
+                if (enableFormationFix)
+                {
+                    campaignGameStarter.AddBehavior(new MissionAgentSpawnLogicFix());
+
+                    var original = Formation_GetUnitPositionWithIndexAccordingToNewOrder_Patch.TargetMethod();
+                    var prefix = typeof(Formation_GetUnitPositionWithIndexAccordingToNewOrder_Patch).GetMethod("Prefix"); 
+                    HarmonyInstance.Patch(original, new HarmonyMethod(prefix));
                 }
             }
+        }
+
+        public override void OnMissionBehaviorInitialize(Mission mission)
+        {
+            //MissionAgentSpawnLogic spawnLogic = Mission.Current.GetMissionBehavior<MissionAgentSpawnLogic>();
+            //if (spawnLogic != null)
+                //mission.AddMissionBehavior(new MissionAgentSpawnLogicFix());
         }
     }
 }

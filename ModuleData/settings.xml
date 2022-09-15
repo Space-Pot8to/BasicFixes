@@ -1,17 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Settings>
-    <!--Ai parties discard excess food when it is looted-->
+    <!--Ai parties discard excess food when it is looted.-->
     <DiscardExcessFood>true</DiscardExcessFood>
 
     <!--
-        AI parties know how many troops they can recruit before entering a settlement, so they 
-        don't get stuck trying to recruit from a settlement that has no troops for them
+        Allows AI parties know exactly how many troops they can recruit before entering a 
+        settlement, so they don't get stuck trying to recruit from a settlement that has no 
+        troops for them.
     -->
     <AIRecruitFix>true</AIRecruitFix>
 
     <!--
-        There is a list of towns that a carvan has to avoid based on certain conditions. When the 
-        caravan is chased by and an enemy, new towns are added to the list. Sometimes this list grows to include all settlements in the game. This fixes that by 
+        A list which contains towns that a caravan can't travel to sometimes grow to include all 
+        towns. This fix clears the list when it grows to that size so the caravan can find a town 
+        to trade with.
     -->
     <CaravanFix>true</CaravanFix>
+
+    <!--
+        This fixes 2 problems. Firstly, when deploying formations, some will sometimes be flagged 
+        as needing cavalry spacing when the don't have any cavalry. This is fixed by resetting the 
+        flag and resetting unit positions at the beginning of deployment. Secondly, when the 
+        player is captain of an infantry formation, the projected unit positions are placed as if 
+        they were cavalry, i.e. spaced out. This fixes the problem by resetting the flag that 
+        determines spacing of projected formations.
+    -->
+    <FormationFix>true</FormationFix>
 </Settings>
