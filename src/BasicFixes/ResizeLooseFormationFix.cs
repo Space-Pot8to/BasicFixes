@@ -24,13 +24,13 @@ namespace BasicFixes
 
         public override void AfterStart()
         {
-            _isInitialSpawnOver = false;
+            _isInitialSpawnOver = true;
             _spawnLogic = Mission.Current.GetMissionBehavior<MissionAgentSpawnLogic>();
         }
 
         public override void OnMissionTick(float dt)
         {
-            if (_spawnLogic != null && _spawnLogic.IsInitialSpawnOver && !_isInitialSpawnOver)
+            if (_spawnLogic != null && !_spawnLogic.IsInitialSpawnOver && _isInitialSpawnOver)
             {
                 Team playerTeam = Mission.Current.PlayerTeam;
                 List<Formation> formations = playerTeam.Formations.ToList();
@@ -45,7 +45,7 @@ namespace BasicFixes
                     order = (FormOrder)boxed;
                     fieldInfo.SetValue(formation, order);
                 }
-                _isInitialSpawnOver = true;
+                _isInitialSpawnOver = false;
             }
         }
     }

@@ -54,11 +54,11 @@ namespace BasicFixes
             }
         }
     }
-    
+
     /// <summary>
-    /// When the player leads an infantry formation and is mounted, the projected unit formation 
-    /// projects unit flags assuming they are all cavalry. This fixes that problem by setting the 
-    /// projected formation to be on foot.
+    /// When the projected unit formation is being made, it used cavalry spacing if the captain 
+    /// is mounted, thus projecting unit flags assuming they are all cavalry. This fixes that 
+    /// problem by setting isMounted using MissionDeploymentPlan.HasSignificantMountedTroops.
     /// </summary>
     [HarmonyPatch]
     public class BadFormationProjectionFix
@@ -72,10 +72,9 @@ namespace BasicFixes
         {
             FieldInfo fieldInfo = arrangement.GetType().GetField("owner", BindingFlags.Instance | BindingFlags.NonPublic);
             Formation owner = fieldInfo.GetValue(arrangement) as Formation;
-            if (owner.GetCountOfUnitsWithCondition(x => x.IsMainAgent) > 0)
+            if (owner != null)
             {
-                bool isPlayerMounted = Agent.Main.HasMount;
-                int cavCount = owner.GetCountOfUnitsWithCondition(x => x.HasMount) - (isPlayerMounted ? 1 : 0);
+                int cavCount = owner.GetCountOfUnitsWithCondition(x => x.HasMount);
                 int footCount = owner.CountOfUnits - cavCount;
                 isMounted = MissionDeploymentPlan.HasSignificantMountedTroops(footCount, cavCount);
             }
