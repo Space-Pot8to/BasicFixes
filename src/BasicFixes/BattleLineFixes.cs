@@ -73,7 +73,12 @@ namespace BasicFixes
 
         public static void Prefix(Formation __instance)
         {
-            FormationTracker.Instance.transformingFormations.Add(__instance);
+            Formation already = FormationTracker.Instance.transformingFormations.FirstOrDefault(x => x.FormationIndex == __instance.FormationIndex);
+            if (already != null)
+                FormationTracker.Instance.transformingFormations.Remove(already);
+            
+            if(__instance.CountOfUnits > 0)
+                FormationTracker.Instance.transformingFormations.Add(__instance);
            __instance.FormOrder = FormOrder.FormOrderCustom(__instance.Width);
         }
     }
