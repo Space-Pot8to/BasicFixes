@@ -20,7 +20,7 @@ namespace BasicFixes
         private bool recruitFix = true;
         private bool caravanFix = true;
         private bool badFormationProjectionFix = true;
-        private bool archerLooseFormationFix = true;
+        private bool resizeLooseFormationFix = true;
 
         public Harmony HarmonyInstance;
         private bool failFamilyFeudQuestFix;
@@ -59,8 +59,8 @@ namespace BasicFixes
                             bool.TryParse(node.InnerText, out badFormationProjectionFix);
                             break;
 
-                        case "ArcherLooseFormationFix":
-                            bool.TryParse(node.InnerText, out archerLooseFormationFix);
+                        case "ResizeLooseFormationFix":
+                            bool.TryParse(node.InnerText, out resizeLooseFormationFix);
                             break;
 
                         case "FailFamilyFeudQuestFix":
@@ -159,15 +159,15 @@ namespace BasicFixes
            MissionAgentSpawnLogic spawnLogic = Mission.Current.GetMissionBehavior<MissionAgentSpawnLogic>();
             if (spawnLogic != null)
             {
-                if (archerLooseFormationFix)
-                    mission.AddMissionBehavior(new ArcherLooseFormationFix());
+                if (resizeLooseFormationFix)
+                    mission.AddMissionBehavior(new ResizeLooseFormationFix());
 
                 if (badFormationProjectionFix)
                     mission.AddMissionBehavior(new MissionAgentSpawnLogicFix());
-
-                if(formationSizeFix)
-                    mission.AddMissionBehavior(new FormationTracker());
             }
+
+            if (formationSizeFix)
+                mission.AddMissionBehavior(new FormationTracker());
         }
     }
 }

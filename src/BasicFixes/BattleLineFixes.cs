@@ -63,8 +63,6 @@ namespace BasicFixes
     /// https://forums.taleworlds.com/index.php?threads/unit-formations-sometimes-force-themselves-into-a-permanent-square-shape.453610/
     /// Makes Formations keep the width of the previous formation.
     /// </summary>
-    /// <dependency cref="HumanAIComponent_AdjustSpeedLimit_Patch"/>
-    /// <dependency cref="ArrangementOrder_GetShieldDirectionOfUnit_Patch"/>
     [HarmonyPatch]
     public class Formation_ArrangementOrder_Patch
     {
@@ -85,7 +83,7 @@ namespace BasicFixes
     /// to hold up their shields. This patch makes units that haven't arrived at their position 
     /// in the formation run.
     /// </summary>
-    /// <requires cref="Formation_ArrangementOrder_Patch"/>
+    /// <dependency cref="Formation_ArrangementOrder_Patch"/>
     [HarmonyPatch]
     public class HumanAIComponent_AdjustSpeedLimit_Patch
     {
@@ -121,7 +119,7 @@ namespace BasicFixes
     /// shields down. This patch makes units which haven't arrived at their position in formation 
     /// not block with shields.
     /// </summary>
-    /// <requires cref="Formation_ArrangementOrder_Patch"/>
+    /// <dependency cref="Formation_ArrangementOrder_Patch"/>
     [HarmonyPatch]
     public class ArrangementOrder_GetShieldDirectionOfUnit_Patch
     {

@@ -53,6 +53,11 @@ namespace BasicFixes
                 }
             }
         }
+
+        public override void OnBattleEnded()
+        {
+            _spawnLogic = null;
+        }
     }
 
     /// <summary>
@@ -68,17 +73,22 @@ namespace BasicFixes
             return AccessTools.FirstMethod(typeof(Formation), method => method.Name.Contains("GetUnitPositionWithIndexAccordingToNewOrder") && method.IsStatic);
         }
 
-        public static void Prefix(Formation simulationFormation, int unitIndex, in WorldPosition formationPosition, in Vec2 formationDirection, IFormationArrangement arrangement, float width, int unitSpacing, int unitCount, ref bool isMounted, int index, ref WorldPosition? unitPosition, ref Vec2? unitDirection, ref float actualWidth)
+        public static void Prefix(Formation __instance, Formation simulationFormation, int unitIndex, in WorldPosition formationPosition, in Vec2 formationDirection, IFormationArrangement arrangement, float width, int unitSpacing, int unitCount, ref bool isMounted, int index, ref WorldPosition? unitPosition, ref Vec2? unitDirection, ref float actualWidth)
         {
             FieldInfo fieldInfo = arrangement.GetType().GetField("owner", BindingFlags.Instance | BindingFlags.NonPublic);
-            Formation owner = fieldInfo.GetValue(arrangement) as Formation;
-            if (owner != null)
+            Formation owner = (Formation)fieldInfo.GetValue(arrangement);
+            if (owner != null && !owner.IsSpawning)
             {
                 int cavCount = owner.GetCountOfUnitsWithCondition(x => x.HasMount);
                 int footCount = owner.CountOfUnits - cavCount;
                 isMounted = MissionDeploymentPlan.HasSignificantMountedTroops(footCount, cavCount);
+
+                Agent agent = owner.GetUnitWithIndex(unitIndex);
+                if (owner.Captain == agent)
+                {
+
+                }
             }
         }
     }
-
 }

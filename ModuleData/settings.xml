@@ -31,7 +31,7 @@
         When archers are in loose formation and start getting killed, the formation will be 
         resized to a smaller width and will change to line formation.
     -->
-    <ArcherLooseFormationFix>true</ArcherLooseFormationFix>
+    <ResizeLooseFormationFix>true</ResizeLooseFormationFix>
 
     <!--
         Fixes problem as described here: https://forums.taleworlds.com/index.php?threads/family-feud-quest-fails-if-you-go-to-tournament-before-its-completion.453479/

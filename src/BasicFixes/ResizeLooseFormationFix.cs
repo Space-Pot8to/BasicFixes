@@ -17,20 +17,20 @@ namespace BasicFixes
     /// resized to Formation.FormOrder._customWidth, which for an archer formation is set at 
     /// around 47 at the beginning of the mission.
     /// </summary>
-    public class ArcherLooseFormationFix : MissionLogic
+    public class ResizeLooseFormationFix : MissionLogic
     {
         private bool _isInitialSpawnOver;
         private MissionAgentSpawnLogic _spawnLogic;
 
         public override void AfterStart()
         {
-            _isInitialSpawnOver = true;
+            _isInitialSpawnOver = false;
             _spawnLogic = Mission.Current.GetMissionBehavior<MissionAgentSpawnLogic>();
         }
 
         public override void OnMissionTick(float dt)
         {
-            if (_spawnLogic != null && !_spawnLogic.IsInitialSpawnOver && _isInitialSpawnOver)
+            if (_spawnLogic != null && _spawnLogic.IsInitialSpawnOver && !_isInitialSpawnOver)
             {
                 Team playerTeam = Mission.Current.PlayerTeam;
                 List<Formation> formations = playerTeam.Formations.ToList();
@@ -45,8 +45,13 @@ namespace BasicFixes
                     order = (FormOrder)boxed;
                     fieldInfo.SetValue(formation, order);
                 }
-                _isInitialSpawnOver = false;
+                _isInitialSpawnOver = true;
             }
+        }
+
+        public override void OnBattleEnded()
+        {
+            _spawnLogic = null;
         }
     }
 }
