@@ -9,16 +9,40 @@ using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using Helpers;
+using TaleWorlds.CampaignSystem.CampaignBehaviors.AiBehaviors;
 
 namespace BasicFixes
 {
+	public class AiVisitSettlementBehaviorFix : BasicFix
+    {
+		public AiVisitSettlementBehaviorFix() : base()
+        {
+			base.CampaignBehaviors.Add(
+				new Tuple<CampaignBehaviorCondition, CampaignBehaviorConsequence>
+				(
+					delegate (Game game, IGameStarter starter)
+					{
+						return starter as CampaignGameStarter != null;
+					},
+					delegate (Game game, IGameStarter starter)
+					{
+						AiVisitSettlementBehavior badBehavior = (starter as CampaignGameStarter).CampaignBehaviors.FirstOrDefault(x => x is AiVisitSettlementBehavior) as AiVisitSettlementBehavior;
+						if (badBehavior != null)
+							(starter as CampaignGameStarter).RemoveBehavior(badBehavior);
+						(starter as CampaignGameStarter).AddBehavior(new AiVisitSettlementBehaviorReplacement());
+					}
+				)
+			);
+        }
+	}
+
 	/// <summary>
 	/// Feels silly to recreate an entire class to fix one method, but here we are. The bad method 
 	/// is ApproximateNumberOfVolunteersCanBeRecruitedFromSettlement. The original method doesn't 
 	/// take into account whether or not the relation between the notable and the mobile party 
 	/// leader will allow the mobile party to recruit at all.
 	/// </summary>
-	public class AiVisitSettlementBehaviorFixed : CampaignBehaviorBase
+	public class AiVisitSettlementBehaviorReplacement : CampaignBehaviorBase
 	{
 		// Token: 0x06003B85 RID: 15237 RVA: 0x0011A08C File Offset: 0x0011828C
 		public override void RegisterEvents()
@@ -203,7 +227,7 @@ namespace BasicFixes
 							}
 							if (!value2.IsCastle && !mobileParty.Party.IsStarving && (float)leaderHero.Gold > num13 && (leaderHero.Clan.Leader == leaderHero || (float)leaderHero.Clan.Gold > num12) && num10 > mobileParty.PartySizeRatio)
 							{
-								num32 = (float)AiVisitSettlementBehaviorFixed.ApproximateNumberOfVolunteersCanBeRecruitedFromSettlement(leaderHero, value2);
+								num32 = (float)AiVisitSettlementBehaviorReplacement.ApproximateNumberOfVolunteersCanBeRecruitedFromSettlement(leaderHero, value2);
 								if(num32 > 0)
                                 {
 

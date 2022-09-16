@@ -13,17 +13,30 @@ using TaleWorlds.MountAndBlade;
 
 namespace BasicFixes
 {
+    public class FamilyFeudQuestFix : BasicFix
+    {
+        public FamilyFeudQuestFix() : base()
+        {
+            base.SimpleHarmonyPatches.Add(new FamilyFeudIssueBehavior_FamilyFeudIssueQuest_OnMissionEnd_Patch());
+        }
+    }
+
     /// <summary>
     /// Problem as described here https://forums.taleworlds.com/index.php?threads/family-feud-quest-fails-if-you-go-to-tournament-before-its-completion.453479/
     /// The vanilla logic for this quest ends with failure when the player falls unconcious for 
     /// any reason, even if it happens outside the quest's target settlement.
     /// </summary>
     [HarmonyPatch]
-    public class FailFamilyFeudQuestFix
+    public class FamilyFeudIssueBehavior_FamilyFeudIssueQuest_OnMissionEnd_Patch : SimpleHarmonyPatch
     {
-        public static MethodBase TargetMethod()
+        public override string PatchType { get { return "Prefix"; } }
+
+        public override MethodBase TargetMethod
         {
-            return typeof(FamilyFeudIssueBehavior.FamilyFeudIssueQuest).GetMethod("OnMissionEnd", BindingFlags.Instance | BindingFlags.NonPublic);
+            get
+            {
+                return typeof(FamilyFeudIssueBehavior.FamilyFeudIssueQuest).GetMethod("OnMissionEnd", BindingFlags.Instance | BindingFlags.NonPublic);
+            }
         }
 
         public static bool Prefix(FamilyFeudIssueBehavior.FamilyFeudIssueQuest __instance, IMission mission)

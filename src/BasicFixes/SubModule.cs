@@ -1,8 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using System.Xml;
+using System.Reflection;
 
-using TaleWorlds.CampaignSystem;
-using TaleWorlds.CampaignSystem.CampaignBehaviors.AiBehaviors;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
 
@@ -13,25 +13,88 @@ using HarmonyLib;
 
 namespace BasicFixes
 {
+    public abstract class SimpleHarmonyPatch
+    {
+        public abstract MethodBase TargetMethod { get; }
+
+        public abstract string PatchType { get; }
+    }
+
+    public class BasicFix
+    {
+        public delegate bool MissionCondition(Mission mission);
+        public delegate void MissionConsequence(Mission mission);
+        public delegate bool CampaignBehaviorCondition(Game game, IGameStarter starter);
+        public delegate void CampaignBehaviorConsequence(Game game, IGameStarter starter);
+
+        public List<SimpleHarmonyPatch> SimpleHarmonyPatches;
+        public List<Tuple<MissionCondition, MissionConsequence>> MissionLogics;
+        public List<Tuple<CampaignBehaviorCondition, CampaignBehaviorConsequence>> CampaignBehaviors;
+
+        public BasicFix()
+        {
+            SimpleHarmonyPatches = new List<SimpleHarmonyPatch>();
+            MissionLogics = new List<Tuple<MissionCondition, MissionConsequence>>();
+            CampaignBehaviors = new List<Tuple<CampaignBehaviorCondition, CampaignBehaviorConsequence>>();
+        }
+
+        public void PatchAll(Harmony instance)
+        {
+            foreach(SimpleHarmonyPatch patch in SimpleHarmonyPatches)
+            {
+                var original = patch.TargetMethod;
+                string patchType = patch.PatchType;
+                Type type = patch.GetType();
+                var prefix = patchType == "Prefix" ? new HarmonyMethod(type.GetMethod(patchType)) : null;
+                var postfix = patchType == "Postfix" ? new HarmonyMethod(type.GetMethod(patchType)) : null;
+                var transpiler = patchType == "Transpiler" ? new HarmonyMethod(type.GetMethod(patchType)) : null;
+                var finalizer = patchType == "Finalizer" ? new HarmonyMethod(type.GetMethod(patchType)) : null;
+                instance.Patch(original, prefix, postfix, transpiler, finalizer);
+            }
+        }
+
+        public void AddCampaignBehaviors(Game game, IGameStarter starter)
+        {
+            foreach (Tuple<CampaignBehaviorCondition, CampaignBehaviorConsequence> pair in CampaignBehaviors)
+            {
+                if (pair.Item1(game, starter))
+                    pair.Item2(game, starter);
+            }
+        }
+
+        public void AddMissionLogics(Mission mission)
+        {
+            foreach(Tuple<MissionCondition, MissionConsequence> pair in MissionLogics)
+            {
+                if (pair.Item1(mission))
+                    pair.Item2(mission);
+            }
+        }
+    }
+
     public class SubModule : MBSubModuleBase
     {
         // fixes are enalbed by default
-        private bool discardExcessFood = true;
-        private bool recruitFix = true;
-        private bool caravanFix = true;
-        private bool badFormationProjectionFix = true;
-        private bool resizeLooseFormationFix = true;
+        #region Module Settings
+        public static bool discardExcessFood = true;
+        public static bool recruitFix = true;
+        public static bool caravanFix = true;
+        public static bool badFormationProjectionFix = true;
+        public static bool resizeLooseFormationFix = true;
+        public static bool failFamilyFeudQuestFix;
+        public static bool lordsNotSoldFix;
+        public static bool unitsRunWhenFormingUp;
+        public static bool unitsDontUseShieldsWhenFormingUp;
+        public static bool formationSizeFix;
+        #endregion
 
         public Harmony HarmonyInstance;
-        private bool failFamilyFeudQuestFix;
-        private bool lordsNotSoldFix;
-        private bool unitsRunWhenFormingUp;
-        private bool unitsDontUseShieldsWhenFormingUp;
-        private bool formationSizeFix;
+        private List<BasicFix> basicFixes;
 
         protected override void OnSubModuleLoad()
         {
             base.OnSubModuleLoad();
+            basicFixes = new List<BasicFix>();
             HarmonyInstance = new Harmony("mod.harmony.BasicFixes");
             XmlDocument settingsDoc = MiscHelper.LoadXmlFile(ModuleHelper.GetModuleFullPath("BasicFixes") + "ModuleData/settings.xml");
             if (settingsDoc != null)
@@ -89,85 +152,55 @@ namespace BasicFixes
                 }
             }
 
-            if (badFormationProjectionFix)
-            {
-                var original = BadFormationProjectionFix.TargetMethod();
-                var prefix = typeof(BadFormationProjectionFix).GetMethod("Prefix");
-                HarmonyInstance.Patch(original, new HarmonyMethod(prefix));
-            }
+            #region Campaign Fixes
+            if (discardExcessFood)
+                basicFixes.Add(new DiscardExcessiveFoodFix());
 
             if (failFamilyFeudQuestFix)
-            {
-                var original = FailFamilyFeudQuestFix.TargetMethod();
-                var prefix = typeof(FailFamilyFeudQuestFix).GetMethod("Prefix");
-                HarmonyInstance.Patch(original, new HarmonyMethod(prefix));
-            }
+                basicFixes.Add(new FamilyFeudQuestFix());
 
+            if (recruitFix)
+                basicFixes.Add(new AiVisitSettlementBehaviorFix());
+
+            if(caravanFix)
+                basicFixes.Add(new CaravansCampaignBehaviorFix());
+                
+            #endregion
+
+            #region Mission Fixes
             if (lordsNotSoldFix)
-            {
-                var original = LordsNotSoldOffFix.TargetMethod();
-                var prefix = typeof(LordsNotSoldOffFix).GetMethod("Prefix");
-                HarmonyInstance.Patch(original, new HarmonyMethod(prefix));
-            }
+                basicFixes.Add(new LordsNotSoldOffFix());
+
+            if (badFormationProjectionFix)
+                basicFixes.Add(new MissionAgentSpawnLogicFix());
 
             if (formationSizeFix)
+                basicFixes.Add(new BattleLineFix());
+
+            if (resizeLooseFormationFix)
+                basicFixes.Add(new ResizeLooseFormationFix());
+            #endregion
+
+            foreach (BasicFix fix in basicFixes)
             {
-                var original = Formation_ArrangementOrder_Patch.TargetMethod();
-                var prefix = typeof(Formation_ArrangementOrder_Patch).GetMethod("Prefix");
-                HarmonyInstance.Patch(original, new HarmonyMethod(prefix));
-
-                if (unitsRunWhenFormingUp)
-                {
-                    var original2 = HumanAIComponent_AdjustSpeedLimit_Patch.TargetMethod();
-                    var prefix2 = typeof(HumanAIComponent_AdjustSpeedLimit_Patch).GetMethod("Prefix");
-                    HarmonyInstance.Patch(original2, new HarmonyMethod(prefix2));
-                }
-
-                if (unitsDontUseShieldsWhenFormingUp)
-                {
-                    var original3 = ArrangementOrder_GetShieldDirectionOfUnit_Patch.TargetMethod();
-                    var prefix3 = typeof(ArrangementOrder_GetShieldDirectionOfUnit_Patch).GetMethod("Prefix");
-                    HarmonyInstance.Patch(original3, new HarmonyMethod(prefix3));
-                }
+                fix.PatchAll(HarmonyInstance);
             }
         }
 
         protected override void InitializeGameStarter(Game game, IGameStarter starter)
         {
-            CampaignGameStarter campaignGameStarter = starter as CampaignGameStarter;
-            if(campaignGameStarter != null)
+            foreach(BasicFix fix in basicFixes)
             {
-                if(discardExcessFood)
-                    campaignGameStarter.AddBehavior(new DiscardExcessiveItemsBehavior());
-
-                if (recruitFix)
-                {
-                    // remove bad AIVisitSettlementBehavior
-                    AiVisitSettlementBehavior badBehavior = campaignGameStarter.CampaignBehaviors.FirstOrDefault(x => x is AiVisitSettlementBehavior) as AiVisitSettlementBehavior;
-                    if (badBehavior != null)
-                        campaignGameStarter.RemoveBehavior(badBehavior);
-                    campaignGameStarter.AddBehavior(new AiVisitSettlementBehaviorFixed());
-                }
-
-                if (caravanFix)
-                    campaignGameStarter.AddBehavior(new CaravansCampaignBehaviorFix());
+                fix.AddCampaignBehaviors(game, starter);
             }
         }
 
         public override void OnBeforeMissionBehaviorInitialize(Mission mission)
         {
-           MissionAgentSpawnLogic spawnLogic = Mission.Current.GetMissionBehavior<MissionAgentSpawnLogic>();
-            if (spawnLogic != null)
+            foreach(BasicFix fix in basicFixes)
             {
-                if (resizeLooseFormationFix)
-                    mission.AddMissionBehavior(new ResizeLooseFormationFix());
-
-                if (badFormationProjectionFix)
-                    mission.AddMissionBehavior(new MissionAgentSpawnLogicFix());
+                fix.AddMissionLogics(mission);
             }
-
-            if (formationSizeFix)
-                mission.AddMissionBehavior(new FormationTracker());
         }
     }
 }

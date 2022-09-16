@@ -16,6 +16,14 @@ using TaleWorlds.Core;
 
 namespace BasicFixes
 {
+	public class LordsNotSoldOffFix : BasicFix
+    {
+		public LordsNotSoldOffFix() : base()
+        {
+			base.SimpleHarmonyPatches.Add(new SellPrisonersAction_ApplyForAllPrisoners_Patch());
+        }
+	}
+
     /// <summary>
     /// Problem: https://forums.taleworlds.com/index.php?threads/ransom-for-captured-lords-is-not-paid-after-upgrading-to-1-8-0.453369/
 	/// 
@@ -26,11 +34,16 @@ namespace BasicFixes
 	/// the party menu or by the sell all button in the game menu.
 	/// </remarks>
     [HarmonyPatch]
-    public class LordsNotSoldOffFix
+    public class SellPrisonersAction_ApplyForAllPrisoners_Patch : SimpleHarmonyPatch
     {
-        public static MethodBase TargetMethod()
+        public override string PatchType { get { return "Prefix"; } }
+
+        public override MethodBase TargetMethod
         {
-            return AccessTools.FirstMethod(typeof(SellPrisonersAction), method => method.Name.Contains("ApplyForAllPrisoners") && method.IsStatic);
+			get
+			{
+				return AccessTools.FirstMethod(typeof(SellPrisonersAction), method => method.Name.Contains("ApplyForAllPrisoners") && method.IsStatic);
+			}
         }
 
         public static bool Prefix(MobileParty sellerParty, TroopRoster prisoners, Settlement currentSettlement, bool applyGoldChange = true)

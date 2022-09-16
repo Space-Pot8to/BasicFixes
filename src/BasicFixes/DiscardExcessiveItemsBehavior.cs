@@ -10,6 +10,25 @@ using TaleWorlds.Core;
 
 namespace BasicFixes
 {
+    public class DiscardExcessiveFoodFix : BasicFix
+    {
+        public DiscardExcessiveFoodFix() : base()
+        {
+            base.CampaignBehaviors.Add(
+                new Tuple<CampaignBehaviorCondition, CampaignBehaviorConsequence>
+                (
+                    delegate (Game game, IGameStarter starter)
+                    {
+                        return starter as CampaignGameStarter != null;
+                    },
+                    delegate (Game game, IGameStarter starter)
+                    {
+                        (starter as CampaignGameStarter).AddBehavior(new DiscardExcessiveItemsBehavior());
+                    }
+                ));
+        }
+    }
+
     /// <summary>
     /// This campaign behavior makes sure that ai parties don't kill their speed by becoming overburdened.
     /// Either 1 the ai party needs to be prevented from taking on too much weight, or 2 the excess 

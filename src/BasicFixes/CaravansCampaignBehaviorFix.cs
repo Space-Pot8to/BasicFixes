@@ -9,9 +9,30 @@ using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.CampaignBehaviors;
 using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Settlements;
+using TaleWorlds.Core;
 
 namespace BasicFixes
 {
+    public class CaravansCampaignBehaviorFix : BasicFix
+    {
+        public CaravansCampaignBehaviorFix() : base()
+        {
+            base.CampaignBehaviors.Add(
+                new Tuple<CampaignBehaviorCondition, CampaignBehaviorConsequence>
+                (
+                    delegate (Game game, IGameStarter starter)
+                    {
+                        return starter as CampaignGameStarter != null;
+                    },
+                    delegate (Game game, IGameStarter starter)
+                    {
+                        (starter as CampaignGameStarter).AddBehavior(new CaravanClearForbiddenTowns());
+                    }
+                )
+            );
+        }
+    }
+
     /// <summary>
     /// CaravansCampaignBehavior._previouslyChangedCaravanTargetsDueToEnemyOnWay is a dictionary 
     /// that keeps a list of settlements that can't be traveled to for each caravan. The entry 
@@ -20,7 +41,7 @@ namespace BasicFixes
     /// carvan can travel to, meaning the caravan becomes stuck and won't move. This behavior 
     /// fixes this problem by clearing the list when it reaches this state.
     /// </summary>
-    public class CaravansCampaignBehaviorFix : CampaignBehaviorBase
+    public class CaravanClearForbiddenTowns : CampaignBehaviorBase
     {
         private CaravansCampaignBehavior _original;
 

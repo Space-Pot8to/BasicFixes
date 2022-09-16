@@ -331,7 +331,7 @@
   <ItemGroup>
     <Compile Include="CaravansCampaignBehaviorFix.cs" />
     <Compile Include="ClanPartiesStealGarrisonFix.cs" />
-    <Compile Include="DiscardEscessiveItemsBehavior.cs" />
+    <Compile Include="DiscardExcessiveItemsBehavior.cs" />
     <Compile Include="AiVisitSettlementBehaviorFixed.cs" />
     <Compile Include="FailFamilyFeudQuestFix.cs" />
     <Compile Include="BattleLineFixes.cs" />

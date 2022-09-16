@@ -11,6 +11,31 @@ using HarmonyLib;
 
 namespace BasicFixes
 {
+    public class BattleLineFix : BasicFix
+    {
+        public BattleLineFix() : base()
+        {
+            base.MissionLogics.Add(
+                new Tuple<MissionCondition, MissionConsequence>
+                (
+                    delegate (Mission mission)
+                    {
+                        return true;
+                    },
+                    delegate (Mission mission)
+                    {
+                        mission.AddMissionBehavior(new FormationTracker());
+                    }
+                ));
+
+            base.SimpleHarmonyPatches.Add(new Formation_ArrangementOrder_Patch());
+            if(SubModule.unitsRunWhenFormingUp)
+                base.SimpleHarmonyPatches.Add(new HumanAIComponent_AdjustSpeedLimit_Patch());
+            if (SubModule.unitsDontUseShieldsWhenFormingUp)
+                base.SimpleHarmonyPatches.Add(new ArrangementOrder_GetShieldDirectionOfUnit_Patch());
+        }
+    }
+
     /// <summary>
     /// Problem is that formations don't keep the number of rows in their formation when resizing 
     /// for different formation as described here:
@@ -64,12 +89,18 @@ namespace BasicFixes
     /// Makes Formations keep the width of the previous formation.
     /// </summary>
     [HarmonyPatch]
-    public class Formation_ArrangementOrder_Patch
+    public class Formation_ArrangementOrder_Patch : SimpleHarmonyPatch
     {
-        public static MethodBase TargetMethod()
+        
+        public override MethodBase TargetMethod
         {
-            return AccessTools.PropertySetter(typeof(Formation), "ArrangementOrder");
+            get
+            {
+                return AccessTools.PropertySetter(typeof(Formation), "ArrangementOrder");
+            }
         }
+
+        public override string PatchType { get { return "Prefix"; } }
 
         public static void Prefix(Formation __instance)
         {
@@ -90,11 +121,15 @@ namespace BasicFixes
     /// </summary>
     /// <dependency cref="Formation_ArrangementOrder_Patch"/>
     [HarmonyPatch]
-    public class HumanAIComponent_AdjustSpeedLimit_Patch
+    public class HumanAIComponent_AdjustSpeedLimit_Patch : SimpleHarmonyPatch
     {
-        public static MethodBase TargetMethod()
+        public override string PatchType { get { return "Prefix"; } }
+        public override MethodBase TargetMethod
         {
-            return AccessTools.Method(typeof(HumanAIComponent), "AdjustSpeedLimit");
+            get
+            {
+                return AccessTools.Method(typeof(HumanAIComponent), "AdjustSpeedLimit");
+            }
         }
 
         public static void Prefix(Agent agent, ref float desiredSpeed, ref bool limitIsMultiplier)
@@ -126,11 +161,15 @@ namespace BasicFixes
     /// </summary>
     /// <dependency cref="Formation_ArrangementOrder_Patch"/>
     [HarmonyPatch]
-    public class ArrangementOrder_GetShieldDirectionOfUnit_Patch
+    public class ArrangementOrder_GetShieldDirectionOfUnit_Patch : SimpleHarmonyPatch
     {
-        public static MethodBase TargetMethod()
+        public override string PatchType { get { return "Prefix"; } }
+        public override MethodBase TargetMethod
         {
-            return AccessTools.Method(typeof(ArrangementOrder), "GetShieldDirectionOfUnit");
+            get
+            {
+                return AccessTools.Method(typeof(ArrangementOrder), "GetShieldDirectionOfUnit");
+            }
         }
 
         public static bool Prefix(Formation formation, Agent unit, ArrangementOrder.ArrangementOrderEnum orderEnum, ref Agent.UsageDirection __result)

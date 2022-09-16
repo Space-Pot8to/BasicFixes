@@ -14,6 +14,28 @@ using TaleWorlds.MountAndBlade;
 
 namespace BasicFixes
 {
+    public class MissionAgentSpawnLogicFix : BasicFix
+    {
+        public MissionAgentSpawnLogicFix() : base()
+        {
+            base.SimpleHarmonyPatches.Add(new BadFormationProjectionFix());
+
+            base.MissionLogics.Add(
+                new Tuple<MissionCondition, MissionConsequence>
+                (
+                    delegate (Mission mission)
+                    {
+                        return Mission.Current.GetMissionBehavior<MissionAgentSpawnLogic>() != null;
+                    },
+                    delegate (Mission mission)
+                    {
+                        mission.AddMissionBehavior(new FixedMissionAgentSpawnLogic());
+                    }
+                )
+            );
+        }
+    }
+
     /// <summary>
     /// In MissionAgentSpawnLogic.MissionSide.SpawnTroops two numbers (num3 and num4 when looking 
     /// at it in dnspy) count the number of cav troops and foot troops respectively. However these 
@@ -23,7 +45,7 @@ namespace BasicFixes
     /// cav), then on deployment, that formation will have the extra spacing between its troops 
     /// that is meant for a cavalry formation.
     /// </summary>
-    public class MissionAgentSpawnLogicFix : MissionLogic
+    public class FixedMissionAgentSpawnLogic : MissionLogic
     {
         private MissionAgentSpawnLogic _spawnLogic;
 
@@ -66,11 +88,16 @@ namespace BasicFixes
     /// problem by setting isMounted using MissionDeploymentPlan.HasSignificantMountedTroops.
     /// </summary>
     [HarmonyPatch]
-    public class BadFormationProjectionFix
+    public class BadFormationProjectionFix : SimpleHarmonyPatch
     {
-        public static MethodBase TargetMethod()
+        public override string PatchType { get { return "Prefix";  } }
+
+        public override MethodBase TargetMethod
         {
-            return AccessTools.FirstMethod(typeof(Formation), method => method.Name.Contains("GetUnitPositionWithIndexAccordingToNewOrder") && method.IsStatic);
+            get
+            {
+                return AccessTools.FirstMethod(typeof(Formation), method => method.Name.Contains("GetUnitPositionWithIndexAccordingToNewOrder") && method.IsStatic);
+            }
         }
 
         public static void Prefix(Formation __instance, Formation simulationFormation, int unitIndex, in WorldPosition formationPosition, in Vec2 formationDirection, IFormationArrangement arrangement, float width, int unitSpacing, int unitCount, ref bool isMounted, int index, ref WorldPosition? unitPosition, ref Vec2? unitDirection, ref float actualWidth)
