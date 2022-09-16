@@ -33,9 +33,11 @@
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\..\..\Bannerlord.Harmony\bin\Win64_Shipping_Client\0Harmony.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Bannerlord.Harmony">
       <HintPath>..\..\..\Bannerlord.Harmony\bin\Win64_Shipping_Client\Bannerlord.Harmony.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="SandBox">
       <HintPath>..\..\..\SandBox\bin\Win64_Shipping_Client\SandBox.dll</HintPath>
