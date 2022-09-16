@@ -23,68 +23,18 @@ namespace BasicFixes
     /// cav), then on deployment, that formation will have the extra spacing between its troops 
     /// that is meant for a cavalry formation.
     /// </summary>
-    public class MissionAgentSpawnLogicFix : CampaignBehaviorBase
+    public class MissionAgentSpawnLogicFix : MissionLogic
     {
-        private bool _isInitialSpawnOver;
+        private MissionAgentSpawnLogic _spawnLogic;
 
-        public override void RegisterEvents()
+        public override void AfterStart()
         {
-            CampaignEvents.MissionTickEvent.AddNonSerializedListener(this, new Action<float>(this.OnMissionTick));
-            CampaignEvents.OnMissionStartedEvent.AddNonSerializedListener(this, new Action<IMission>(this.OnMissionStarted));
+            _spawnLogic = Mission.Current.GetMissionBehavior<MissionAgentSpawnLogic>();
         }
 
-        public override void SyncData(IDataStore dataStore)
-        { 
-
-        }
-
-        private void OnMissionStarted(IMission mission)
+        public override void OnMissionTick(float dt)
         {
-            _isInitialSpawnOver = false;
-        }
-
-        private void OnMissionTick(float dt)
-        {
-            if (!_isInitialSpawnOver)
-            {
-                MissionAgentSpawnLogic spawnLogic = Mission.Current.GetMissionBehavior<MissionAgentSpawnLogic>();
-                if (spawnLogic != null)
-                {
-                    if (!spawnLogic.IsInitialSpawnOver)
-                    {
-                        Team playerTeam = Mission.Current.PlayerTeam;
-                        List<Formation> formations = playerTeam.Formations.ToList();
-                        for (int i = 0; i < formations.Count; i++)
-                        {
-                            Formation formation = formations[i];
-                            int cavCount = formation.GetCountOfUnitsWithCondition(x => x.HasMount);
-                            int footCount = formation.CountOfUnits - cavCount;
-                            bool isMounted = MissionDeploymentPlan.HasSignificantMountedTroops(footCount, cavCount);
-                            if (formation.CalculateHasSignificantNumberOfMounted && !isMounted)
-                            {
-                                formation.BeginSpawn(formation.CountOfUnits, isMounted);
-                                WorldPosition worldPosition = new WorldPosition(Mission.Current.Scene, formation.OrderGroundPosition + new Vec3(0.1f, 0.1f, 0f));
-                                formation.SetPositioning(worldPosition, null, 0);
-                            }
-                        }
-                    }
-                    else
-                        _isInitialSpawnOver = true;
-                }
-            }
-        }
-    }
-
-    // here's a harmony way of redoing spawns, but let's try to have as few dependencies as possible
-    /**
-    [HarmonyPatch]
-    public class MissionAgentSpawnLogicPatch
-    {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(MissionAgentSpawnLogic), "CheckInitialSpawns")]
-        public static void MissionAgentSpawnLogic_SpawnTroops_Patch(MissionAgentSpawnLogic __instance)
-        {
-            if (!__instance.IsInitialSpawnOver)
+            if (_spawnLogic != null && !_spawnLogic.IsInitialSpawnOver)
             {
                 Team playerTeam = Mission.Current.PlayerTeam;
                 List<Formation> formations = playerTeam.Formations.ToList();
@@ -97,17 +47,13 @@ namespace BasicFixes
                     if (formation.CalculateHasSignificantNumberOfMounted && !isMounted)
                     {
                         formation.BeginSpawn(formation.CountOfUnits, isMounted);
-                        Mission.Current.SpawnFormation(formation);
-                        WorldPosition worldPosition = new WorldPosition(Mission.Current.Scene, formation.OrderGroundPosition + new TaleWorlds.Library.Vec3(0.1f,0.1f,0f));
+                        WorldPosition worldPosition = new WorldPosition(Mission.Current.Scene, formation.OrderGroundPosition + new Vec3(0.1f, 0.1f, 0f));
                         formation.SetPositioning(worldPosition, null, 0);
                     }
                 }
             }
         }
-            
     }
-    */
-
     
     /// <summary>
     /// When the player leads an infantry formation and is mounted, the projected unit formation 
@@ -115,7 +61,7 @@ namespace BasicFixes
     /// projected formation to be on foot.
     /// </summary>
     [HarmonyPatch]
-    public class Formation_GetUnitPositionWithIndexAccordingToNewOrder_Patch
+    public class BadFormationProjectionFix
     {
         public static MethodBase TargetMethod()
         {

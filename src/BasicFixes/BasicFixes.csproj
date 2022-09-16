@@ -312,9 +312,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CaravansCampaignBehaviorFix.cs" />
+    <Compile Include="ClanPartiesStealGarrisonFix.cs" />
     <Compile Include="DiscardEscessiveItemsBehavior.cs" />
     <Compile Include="AiVisitSettlementBehaviorFixed.cs" />
-    <Compile Include="MissionAgentSpawnLogicPatch.cs" />
+    <Compile Include="FailFamilyFeudQuestFix.cs" />
+    <Compile Include="BattleLineFixes.cs" />
+    <Compile Include="LordsNotSoldOffFix.cs" />
+    <Compile Include="MissionAgentSpawnLogicFix.cs" />
+    <Compile Include="ResizeLooseFormationFix.cs" />
+    <Compile Include="SelectTroopsForMissionFix.cs" />
     <Compile Include="SubModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

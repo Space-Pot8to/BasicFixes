@@ -25,5 +25,40 @@
         they were cavalry, i.e. spaced out. This fixes the problem by resetting the flag that 
         determines spacing of projected formations.
     -->
-    <FormationFix>true</FormationFix>
+    <BadFormationProjectionFix>true</BadFormationProjectionFix>
+
+    <!--
+        When archers are in loose formation and start getting killed, the formation will be 
+        resized to a smaller width and will change to line formation.
+    -->
+    <ArcherLooseFormationFix>true</ArcherLooseFormationFix>
+
+    <!--
+        Fixes problem as described here: https://forums.taleworlds.com/index.php?threads/family-feud-quest-fails-if-you-go-to-tournament-before-its-completion.453479/
+        The vanilla logic for the family feud quest ends with failure when the player falls 
+        unconcious, even when the player is not in the mission settlement. 
+    -->
+    <FailFamilyFeudQuestFix>true</FailFamilyFeudQuestFix>
+
+    <!--
+        Fixes problem as described here: https://forums.taleworlds.com/index.php?threads/ransom-for-captured-lords-is-not-paid-after-upgrading-to-1-8-0.453369/
+        Lords aren't sold off when "Ransom your prisoners" is selected in the tavern game menu. 
+    -->
+    <LordsNotSoldFix>true</LordsNotSoldFix>
+
+    <!--
+        Fixes problem as described here: https://forums.taleworlds.com/index.php?threads/unit-formations-sometimes-force-themselves-into-a-permanent-square-shape.453610/
+        Makes Formations keep the width of the previous formation.
+    -->
+    <FormationSizeFix>true</FormationSizeFix>
+
+    <!--
+        Makes units that haven't arrived at their position in the formation run.
+    -->
+    <UnitsRunWhenFormingUp>true</UnitsRunWhenFormingUp>
+
+    <!--
+        Makes units which haven't arrived at their position in formation not block with shields.
+    -->
+    <UnitsDontUseShieldsWhenFormingUp>true</UnitsDontUseShieldsWhenFormingUp>
 </Settings>
