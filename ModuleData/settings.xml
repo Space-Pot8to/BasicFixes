@@ -61,4 +61,15 @@
         Makes units which haven't arrived at their position in formation not block with shields.
     -->
     <UnitsDontUseShieldsWhenFormingUp>true</UnitsDontUseShieldsWhenFormingUp>
+
+    <!--
+        Stops the party menu from bouncing around when upgrading.
+    -->
+    <BouncingScrollablePanelFix>true</BouncingScrollablePanelFix>
+
+    <!--
+        Allows formations to be really thin with respect to the direction the formation is facing, 
+        i.e. low in file, but high in count.
+    -->
+    <SkinnyFormations>true</SkinnyFormations>
 </Settings>

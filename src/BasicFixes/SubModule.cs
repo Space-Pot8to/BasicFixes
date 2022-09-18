@@ -81,11 +81,13 @@ namespace BasicFixes
         public static bool caravanFix = true;
         public static bool badFormationProjectionFix = true;
         public static bool resizeLooseFormationFix = true;
-        public static bool failFamilyFeudQuestFix;
-        public static bool lordsNotSoldFix;
-        public static bool unitsRunWhenFormingUp;
-        public static bool unitsDontUseShieldsWhenFormingUp;
-        public static bool formationSizeFix;
+        public static bool failFamilyFeudQuestFix = true;
+        public static bool lordsNotSoldFix = true;
+        public static bool unitsRunWhenFormingUp = true;
+        public static bool unitsDontUseShieldsWhenFormingUp = true;
+        public static bool formationSizeFix = true;
+        public static bool bouncingScrollablePanelFix = true;
+        public static bool skinnyFormations = true;
         #endregion
 
         public Harmony HarmonyInstance;
@@ -146,6 +148,14 @@ namespace BasicFixes
                             bool.TryParse(node.InnerText, out unitsDontUseShieldsWhenFormingUp);
                             break;
 
+                        case "SkinnyFormations":
+                            bool.TryParse(node.InnerText, out skinnyFormations);
+                            break;
+
+                        case "BouncingScrollablePanelFix":
+                            bool.TryParse(node.InnerText, out bouncingScrollablePanelFix);
+                            break;
+
                         default:
                             break;
                     }
@@ -180,6 +190,9 @@ namespace BasicFixes
             if (resizeLooseFormationFix)
                 basicFixes.Add(new ResizeLooseFormationFix());
             #endregion
+
+            if(bouncingScrollablePanelFix)
+                basicFixes.Add(new BouncingScrollablePanelFix());
 
             foreach (BasicFix fix in basicFixes)
             {

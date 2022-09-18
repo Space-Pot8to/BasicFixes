@@ -33,6 +33,9 @@ namespace BasicFixes
                 base.SimpleHarmonyPatches.Add(new HumanAIComponent_AdjustSpeedLimit_Patch());
             if (SubModule.unitsDontUseShieldsWhenFormingUp)
                 base.SimpleHarmonyPatches.Add(new ArrangementOrder_GetShieldDirectionOfUnit_Patch());
+
+            //base.SimpleHarmonyPatches.Add(new PatchToMakeArmyFollowInFormation2());
+            //base.SimpleHarmonyPatches.Add(new PatchToMakeArmyFollowInFormation3());
         }
     }
 
@@ -54,7 +57,7 @@ namespace BasicFixes
 
         public static bool IsFormedUp(Formation formation, float tolerance)
         {
-            bool isFormed = false;
+            bool isFormed = true;
             IEnumerable<Agent> agents = formation.GetUnitsWithoutDetachedOnes();
             foreach (Agent agent in agents)
             {
@@ -72,9 +75,11 @@ namespace BasicFixes
 
         public override void OnMissionTick(float dt)
         {
-            Formation formation = transformingFormations.FirstOrDefault(x => IsFormedUp(x, 1f));
-            if (formation != null)
-                transformingFormations.Remove(formation);
+            //Formation formation = transformingFormations.FirstOrDefault(x => IsFormedUp(x, 0.2f));
+            //if (formation != null)
+            //    transformingFormations.Remove(formation);
+
+            transformingFormations.RemoveAll(x => IsFormedUp(x, 0.2f));
         }
 
         public override void OnBattleEnded()
@@ -107,10 +112,10 @@ namespace BasicFixes
             Formation already = FormationTracker.Instance.transformingFormations.FirstOrDefault(x => x.FormationIndex == __instance.FormationIndex);
             if (already != null)
                 FormationTracker.Instance.transformingFormations.Remove(already);
-            
-            if(__instance.CountOfUnits > 0)
+
+            if (__instance.CountOfUnits > 0)
                 FormationTracker.Instance.transformingFormations.Add(__instance);
-           __instance.FormOrder = FormOrder.FormOrderCustom(__instance.Width);
+            __instance.FormOrder = FormOrder.FormOrderCustom(__instance.Width);
         }
     }
 
@@ -179,7 +184,7 @@ namespace BasicFixes
             {
                 Vec2 formationPosition = formation.GetCurrentGlobalPositionOfUnit(unit, true);
                 Vec2 unitPosition = unit.Position.AsVec2;
-                bool isArrived = formationPosition.Distance(unitPosition).ApproximatelyEqualsTo(0.0f, 1f);
+                bool isArrived = formationPosition.Distance(unitPosition).ApproximatelyEqualsTo(0.0f, 0.5f);
                 if (!isArrived)
                 {
                     __result = Agent.UsageDirection.None;
@@ -188,6 +193,96 @@ namespace BasicFixes
             }
 
             return true;
+        }
+    }
+
+    /// <summary>
+    /// It's stupid that when you tell all formations to follow you that they all collapse to the 
+    /// same point. They should follow with respect to other formations as well.
+    /// </summary>
+    [HarmonyPatch]
+    public class PatchToMakeArmyFollowInFormation : SimpleHarmonyPatch
+    {
+        public Agent Agent { get; set; }
+        public override MethodBase TargetMethod
+        {
+            get
+            {
+                return AccessTools.FirstMethod(typeof(MovementOrder), x => x.Name == "GetPositionAuxFollow");
+            }
+        }
+
+        public override string PatchType { get { return "Prefix"; } }
+
+        public static void Prefix(MovementOrder __instance, Formation f)
+        {
+            
+        }
+    }
+
+    [HarmonyPatch]
+    public class PatchToMakeArmyFollowInFormation2 : SimpleHarmonyPatch
+    {
+        //public MovementOrder OriginalOrder;
+            
+        public static PatchToMakeArmyFollowInFormation2 Instance { get; private set; }
+
+        public PatchToMakeArmyFollowInFormation2()
+        {
+            Instance = this;
+            //OriginalOrder = default(MovementOrder);
+        }
+
+        public override MethodBase TargetMethod
+        {
+            get
+            {
+                return AccessTools.FirstMethod(typeof(MovementOrder), x => x.Name == "OnApply");
+            }
+        }
+
+        public override string PatchType { get { return "Prefix"; } }
+
+        public static void Prefix(Formation formation)
+        {
+            //if (input.OrderEnum == MovementOrder.MovementOrderEnum.Follow) 
+            //{
+                //Instance.OriginalOrder = input;
+                //Agent agent = input._targetAgent;
+               // agent.TeleportToPosition(new Vec3(__instance.Direction * 2f + __instance.GetMiddleFrontUnitPositionOffset() + __instance.CurrentPosition));
+                //MovementOrder order = MovementOrder.MovementOrderFollow(agent);
+                //input = order;
+
+                /*
+                object boxed = input;
+                PropertyInfo fieldInfo1 = input.GetType().GetProperty("_targetAgent");
+
+                // create a ghost agent witha  different position
+
+                fieldInfo1.SetValue(boxed, formation.Width);
+                input = (FormOrder)boxed;
+                */
+            //}
+        }
+    }
+
+    [HarmonyPatch]
+    public class PatchToMakeArmyFollowInFormation3 : SimpleHarmonyPatch
+    {
+        public override MethodBase TargetMethod
+        {
+            get
+            {
+                return AccessTools.FirstMethod(typeof(Formation), x => x.Name == "SetMovementOrder");
+            }
+        }
+
+        public override string PatchType { get { return "Postfix"; } }
+
+        public static void Postfix(Formation __instance)
+        {
+            //if(PatchToMakeArmyFollowInFormation2.Instance.OriginalOrder != default(MovementOrder))
+            //    input = PatchToMakeArmyFollowInFormation2.Instance.OriginalOrder;
         }
     }
 }

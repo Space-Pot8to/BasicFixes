@@ -7,6 +7,7 @@ using TaleWorlds.CampaignSystem.MapEvents;
 using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Roster;
 using TaleWorlds.Core;
+using TaleWorlds.Library;
 
 namespace BasicFixes
 {
@@ -56,8 +57,11 @@ namespace BasicFixes
         /// <param name="mobileParty"></param>
         private void RemoveExcessFood(MobileParty mobileParty)
         {
-            if (mobileParty.TotalFoodAtInventory == 0)
+            if (mobileParty.TotalFoodAtInventory == 0 || !mobileParty.ItemRoster.Any(x => !x.EquipmentElement.IsInvalid() && x.EquipmentElement.Item != null && x.EquipmentElement.Item.IsFood))
+            {
+                Debug.Print("DiscardExcessiveItemsBehavior line 62; " + mobileParty.StringId + " has no food");
                 return;
+            }
 
             // calculate excess weight
             float extraWeight = mobileParty.TotalWeightCarried - mobileParty.InventoryCapacity;
@@ -68,8 +72,14 @@ namespace BasicFixes
                 .OrderByDescending(x => x.Amount)
                 .ToList();
 
+            if (allFoods == null || allFoods.Count == 0)
+            {
+                Debug.Print("DiscardExcessiveItemsBehavior.RemoveExcessFood.allFoods.Count() == 0 for mobileParty " + mobileParty.StringId);
+                return;
+            }
+
             // get list of foods
-            ItemRosterElement largest = allFoods.MaxBy(x => x.GetRosterElementWeight());
+            ItemRosterElement largest = allFoods.First(x => x.GetRosterElementWeight() == allFoods. Max(y => x.GetRosterElementWeight()));
             // make sure removing foods won't make our party starve
             float daysWithFood = mobileParty.GetNumDaysForFoodToLast();
             // when amount is zero, then the excess weight isn't due to food, so let's stop
@@ -85,7 +95,7 @@ namespace BasicFixes
                 .Where(x => x.EquipmentElement.Item.IsFood)
                 .OrderByDescending(x => x.Amount)
                 .ToList();
-                largest = allFoods.MaxBy(x => x.GetRosterElementWeight());
+                largest = allFoods.First(x => x.GetRosterElementWeight() == allFoods.Max(y => x.GetRosterElementWeight()));
                 amount = (int)(largest.Amount * 0.1f);
             }
         }

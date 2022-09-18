@@ -85,6 +85,11 @@
     <Reference Include="System.Core">
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\bin\Win64_Shipping_Client\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq">
       <Private>False</Private>
     </Reference>
@@ -329,6 +334,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BouncingScrollablePanelFix.cs" />
     <Compile Include="CaravansCampaignBehaviorFix.cs" />
     <Compile Include="ClanPartiesStealGarrisonFix.cs" />
     <Compile Include="DiscardExcessiveItemsBehavior.cs" />
