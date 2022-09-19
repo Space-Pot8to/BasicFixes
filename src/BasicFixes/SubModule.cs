@@ -10,6 +10,10 @@ using Helpers;
 using TaleWorlds.ModuleManager;
 
 using HarmonyLib;
+using TaleWorlds.CampaignSystem.Settlements.Locations;
+using TaleWorlds.CampaignSystem;
+using System.Linq;
+using TaleWorlds.ObjectSystem;
 
 namespace BasicFixes
 {
@@ -22,17 +26,20 @@ namespace BasicFixes
 
     public class BasicFix
     {
+        protected bool _isEnabled;
+
         public delegate bool MissionCondition(Mission mission);
         public delegate void MissionConsequence(Mission mission);
         public delegate bool CampaignBehaviorCondition(Game game, IGameStarter starter);
         public delegate void CampaignBehaviorConsequence(Game game, IGameStarter starter);
 
-        public List<SimpleHarmonyPatch> SimpleHarmonyPatches;
-        public List<Tuple<MissionCondition, MissionConsequence>> MissionLogics;
-        public List<Tuple<CampaignBehaviorCondition, CampaignBehaviorConsequence>> CampaignBehaviors;
+        protected List<SimpleHarmonyPatch> SimpleHarmonyPatches;
+        protected List<Tuple<MissionCondition, MissionConsequence>> MissionLogics;
+        protected List<Tuple<CampaignBehaviorCondition, CampaignBehaviorConsequence>> CampaignBehaviors;
 
-        public BasicFix()
+        public BasicFix(bool isEnabled)
         {
+            _isEnabled = isEnabled;
             SimpleHarmonyPatches = new List<SimpleHarmonyPatch>();
             MissionLogics = new List<Tuple<MissionCondition, MissionConsequence>>();
             CampaignBehaviors = new List<Tuple<CampaignBehaviorCondition, CampaignBehaviorConsequence>>();
@@ -88,14 +95,22 @@ namespace BasicFixes
         public static bool formationSizeFix = true;
         public static bool bouncingScrollablePanelFix = true;
         public static bool skinnyFormations = true;
+        public static bool throwablePilum = true;
         #endregion
 
         public Harmony HarmonyInstance;
         private List<BasicFix> basicFixes;
+        private bool _thing;
+
+        public SubModule()
+        {
+            _thing = false;
+        }
 
         protected override void OnSubModuleLoad()
         {
             base.OnSubModuleLoad();
+
             basicFixes = new List<BasicFix>();
             HarmonyInstance = new Harmony("mod.harmony.BasicFixes");
             XmlDocument settingsDoc = MiscHelper.LoadXmlFile(ModuleHelper.GetModuleFullPath("BasicFixes") + "ModuleData/settings.xml");
@@ -156,6 +171,10 @@ namespace BasicFixes
                             bool.TryParse(node.InnerText, out bouncingScrollablePanelFix);
                             break;
 
+                        case "ThrowablePilum":
+                            bool.TryParse(node.InnerText, out throwablePilum);
+                            break;
+
                         default:
                             break;
                     }
@@ -163,36 +182,22 @@ namespace BasicFixes
             }
 
             #region Campaign Fixes
-            if (discardExcessFood)
-                basicFixes.Add(new DiscardExcessiveFoodFix());
-
-            if (failFamilyFeudQuestFix)
-                basicFixes.Add(new FamilyFeudQuestFix());
-
-            if (recruitFix)
-                basicFixes.Add(new AiVisitSettlementBehaviorFix());
-
-            if(caravanFix)
-                basicFixes.Add(new CaravansCampaignBehaviorFix());
-                
+            basicFixes.Add(new DiscardExcessiveFoodFix(discardExcessFood));
+            basicFixes.Add(new FamilyFeudQuestFix(failFamilyFeudQuestFix));
+            basicFixes.Add(new AiVisitSettlementBehaviorFix(recruitFix));
+            basicFixes.Add(new CaravansCampaignBehaviorFix(caravanFix));
             #endregion
 
             #region Mission Fixes
-            if (lordsNotSoldFix)
-                basicFixes.Add(new LordsNotSoldOffFix());
-
-            if (badFormationProjectionFix)
-                basicFixes.Add(new MissionAgentSpawnLogicFix());
-
-            if (formationSizeFix)
-                basicFixes.Add(new BattleLineFix());
-
-            if (resizeLooseFormationFix)
-                basicFixes.Add(new ResizeLooseFormationFix());
+            basicFixes.Add(new LordsNotSoldOffFix(lordsNotSoldFix));
+            basicFixes.Add(new MissionAgentSpawnLogicFix(badFormationProjectionFix));
+            basicFixes.Add(new BattleLineFix(formationSizeFix));
+            basicFixes.Add(new ResizeLooseFormationFix(resizeLooseFormationFix));
+            basicFixes.Add(new AllowSkinnyFormationsFix(skinnyFormations));
             #endregion
 
-            if(bouncingScrollablePanelFix)
-                basicFixes.Add(new BouncingScrollablePanelFix());
+            basicFixes.Add(new BouncingScrollablePanelFix(bouncingScrollablePanelFix));
+            basicFixes.Add(new PilumNotThrowableFix(throwablePilum));
 
             foreach (BasicFix fix in basicFixes)
             {
@@ -210,10 +215,24 @@ namespace BasicFixes
 
         public override void OnBeforeMissionBehaviorInitialize(Mission mission)
         {
-            foreach(BasicFix fix in basicFixes)
+            /*
+            if (!_thing)
+            {
+                new FormationsFollow().PatchAll(HarmonyInstance);
+                _thing = true;
+            }
+            */
+
+            foreach (BasicFix fix in basicFixes)
             {
                 fix.AddMissionLogics(mission);
             }
         }
+
+        protected override void OnApplicationTick(float dt)
+        {
+            
+        }
     }
+    
 }

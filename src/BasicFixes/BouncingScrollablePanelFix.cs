@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-using HarmonyLib;
 using TaleWorlds.GauntletUI.BaseTypes;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade.GauntletUI.Widgets;
-using TaleWorlds.MountAndBlade.GauntletUI.Widgets.Party;
 using TaleWorlds.TwoDimension;
+
+using HarmonyLib;
 
 namespace BasicFixes
 {
@@ -24,12 +22,16 @@ namespace BasicFixes
 	/// </summary>
 	public class BouncingScrollablePanelFix : BasicFix
     {
-        public BouncingScrollablePanelFix() : base()
+        public BouncingScrollablePanelFix(bool isEnabled) : base(isEnabled)
         {
-            // base.SimpleHarmonyPatches.Add(new NavigatableListPanel_OnWidgetGainedGamepadFocus_Patch());
-			base.SimpleHarmonyPatches.Add(new ScrollablePanel_ScrollToChild_Patch());
+            if(isEnabled)
+				base.SimpleHarmonyPatches.Add(new ScrollablePanel_ScrollToChild_Patch());
         }
 
+		/// <summary>
+		/// I though the wrong widget was getting passed on from this method, but from 
+		/// stepping through it seems to be consistent.
+		/// </summary>
 		[HarmonyPatch]
 		public class NavigatableListPanel_OnWidgetGainedGamepadFocus_Patch : SimpleHarmonyPatch
 		{
@@ -56,7 +58,9 @@ namespace BasicFixes
 
 
 		/// <summary>
-		/// Disables ScrollablePanel.ScrollToChild since it's the source of the bouncing.
+		/// Disables ScrollablePanel.ScrollToChild since it's the source of the bouncing. Better 
+		/// fix is to make the scrollbar get to the correct place in the list, but this is fine 
+		/// for a temporary fix.
 		/// </summary>
         [HarmonyPatch]
         public class ScrollablePanel_ScrollToChild_Patch : SimpleHarmonyPatch

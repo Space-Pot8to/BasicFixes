@@ -72,4 +72,13 @@
         i.e. low in file, but high in count.
     -->
     <SkinnyFormations>true</SkinnyFormations>
+
+    <!--
+        The pilum became unthrowable by either the ai or the player starting on 1.7.something. 
+        This fix again makes it a throwable spear. I also notices that the spear for the Khuzait 
+        T5 infantry isn't throwable when the flavor text says it is a throwing spear. So I made 
+        that one throwable as well.
+    -->
+    <ThrowablePilum>true</ThrowablePilum>
+
 </Settings>

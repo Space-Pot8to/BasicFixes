@@ -343,6 +343,7 @@
     <Compile Include="BattleLineFixes.cs" />
     <Compile Include="LordsNotSoldOffFix.cs" />
     <Compile Include="MissionAgentSpawnLogicFix.cs" />
+    <Compile Include="PilumNotThrowableFix.cs" />
     <Compile Include="ResizeLooseFormationFix.cs" />
     <Compile Include="SelectTroopsForMissionFix.cs" />
     <Compile Include="SubModule.cs" />

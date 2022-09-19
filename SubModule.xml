@@ -1,7 +1,7 @@
 <Module>
 	<Name value="BasicFixes"/>
 	<Id value="BasicFixes"/>
-	<Version value="v1.0.5"/>
+	<Version value="v1.0.6"/>
 	<DefaultModule value="false"/>
 	<ModuleCategory value="Singleplayer"/>
 	<Official value="false"/>
@@ -21,6 +21,31 @@
 			<Tags />
 		</SubModule>
 	</SubModules>
-	<Xmls/>
+	<Xmls>
+		<XmlNode>                
+			<XmlName id="WeaponDescriptions" path="weapon_descriptions"/>
+		</XmlNode>
+		<XmlNode>                
+			<XmlName id="CraftingTemplates" path="crafting_templates"/>
+		</XmlNode>
+		<XmlNode>                
+			<XmlName id="CraftingPieces" path="crafting_pieces"/>
+			<IncludedGameTypes>
+				<GameType value = "Campaign"/>
+				<GameType value = "CampaignStoryMode"/>
+				<GameType value = "CustomGame"/>
+				<GameType value = "EditorGame"/>
+			</IncludedGameTypes>
+		</XmlNode>  
+		<XmlNode>                
+			<XmlName id="Items" path="weapons"/>
+			<IncludedGameTypes>
+				<GameType value = "Campaign"/>
+				<GameType value = "CampaignStoryMode"/>
+				<GameType value = "CustomGame"/>
+				<GameType value = "EditorGame"/>
+			</IncludedGameTypes>
+		</XmlNode>  
+	</Xmls>
 </Module>
 

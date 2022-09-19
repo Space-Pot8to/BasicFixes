@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CraftingPieces>
+  <!--For actual pilum-->
+  <CraftingPiece id="real_pilum_head"
+                 name="{=nr3K4od2}Real Pilum Head"
+                 tier="4"
+                 piece_type="Blade"
+                 mesh="spear_blade_38"
+                 length="23.7"
+                 weight="0.544"
+                 excluded_item_usage_features="swing">
+    <BladeData stack_amount="1"
+               physics_material="wood_weapon"
+               body_name="bo_spear_b"
+               holster_mesh="throwing_spear_quiver_3_2"
+               holster_body_name="bo_throwing_spear_quiver_3_2"
+               holster_mesh_length="96.7">
+      <Thrust damage_type="Pierce"
+              damage_factor="2.8" />
+    </BladeData>
+    <Flags>
+      <Flag name="BonusAgainstShield" />
+    </Flags>
+    <Materials>
+      <Material id="Iron3"
+                count="1" />
+    </Materials>
+  </CraftingPiece>
+
+  <!--To make eastern_throwing_spear_2_t4 actually throwable-->
+  <CraftingPiece id="real_triangular_head"
+                 name="{=MpVC0RXl}Real Northern Triangular Head"
+                 tier="5"
+                 piece_type="Blade"
+                 mesh="spear_blade_13"
+                 length="50.864"
+                 weight="0.592"
+                 excluded_item_usage_features="swing">
+    <BladeData stack_amount="3"
+               physics_material="wood_weapon"
+               body_name="bo_spear_b"
+               holster_mesh="throwing_spear_quiver_5_1"
+               holster_body_name="bo_throwing_spear_quiver_5_1"
+               holster_mesh_length="96.7">
+      <Thrust damage_type="Pierce"
+              damage_factor="2.8" />
+    </BladeData>
+    <Flags>
+      <Flag name="BonusAgainstShield" />
+    </Flags>
+    <Materials>
+      <Material id="Iron5"
+                count="2" />
+    </Materials>
+  </CraftingPiece>
+</CraftingPieces>
