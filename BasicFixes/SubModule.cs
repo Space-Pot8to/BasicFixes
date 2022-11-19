@@ -47,7 +47,7 @@ namespace BasicFixes
 
         public void PatchAll(Harmony instance)
         {
-            foreach(SimpleHarmonyPatch patch in SimpleHarmonyPatches)
+            foreach (SimpleHarmonyPatch patch in SimpleHarmonyPatches)
             {
                 var original = patch.TargetMethod;
                 string patchType = patch.PatchType;
@@ -71,7 +71,7 @@ namespace BasicFixes
 
         public void AddMissionLogics(Mission mission)
         {
-            foreach(Tuple<MissionCondition, MissionConsequence> pair in MissionLogics)
+            foreach (Tuple<MissionCondition, MissionConsequence> pair in MissionLogics)
             {
                 if (pair.Item1(mission))
                     pair.Item2(mission);
@@ -83,7 +83,7 @@ namespace BasicFixes
     {
         // fixes are enalbed by default
         #region Module Settings
-        public static bool discardExcessFood = true;
+        /// public static bool discardExcessFood = true;
         public static bool recruitFix = true;
         public static bool caravanFix = true;
         public static bool badFormationProjectionFix = true;
@@ -94,7 +94,7 @@ namespace BasicFixes
         public static bool unitsDontUseShieldsWhenFormingUp = true;
         public static bool formationSizeFix = true;
         public static bool bouncingScrollablePanelFix = true;
-        public static bool skinnyFormations = true;
+        /// public static bool skinnyFormations = true;
         public static bool throwablePilum = true;
         #endregion
 
@@ -123,9 +123,9 @@ namespace BasicFixes
                     string name = node.Name;
                     switch (name)
                     {
-                        case "DiscardExcessFood":
-                            bool.TryParse(node.InnerText, out discardExcessFood);
-                            break;
+                        //case "DiscardExcessFood":
+                        //    bool.TryParse(node.InnerText, out discardExcessFood);
+                        //    break;
 
                         case "AIRecruitFix":
                             bool.TryParse(node.InnerText, out recruitFix);
@@ -163,9 +163,9 @@ namespace BasicFixes
                             bool.TryParse(node.InnerText, out unitsDontUseShieldsWhenFormingUp);
                             break;
 
-                        case "SkinnyFormations":
-                            bool.TryParse(node.InnerText, out skinnyFormations);
-                            break;
+                        //case "SkinnyFormations":
+                        //    bool.TryParse(node.InnerText, out skinnyFormations);
+                        //    break;
 
                         case "BouncingScrollablePanelFix":
                             bool.TryParse(node.InnerText, out bouncingScrollablePanelFix);
@@ -182,7 +182,7 @@ namespace BasicFixes
             }
 
             #region Campaign Fixes
-            basicFixes.Add(new DiscardExcessiveFoodFix(discardExcessFood));
+            /// basicFixes.Add(new DiscardExcessiveFoodFix(discardExcessFood));
             basicFixes.Add(new FamilyFeudQuestFix(failFamilyFeudQuestFix));
             basicFixes.Add(new AiVisitSettlementBehaviorFix(recruitFix));
             basicFixes.Add(new CaravansCampaignBehaviorFix(caravanFix));
@@ -193,7 +193,7 @@ namespace BasicFixes
             basicFixes.Add(new MissionAgentSpawnLogicFix(badFormationProjectionFix));
             basicFixes.Add(new BattleLineFix(formationSizeFix));
             basicFixes.Add(new ResizeLooseFormationFix(resizeLooseFormationFix));
-            basicFixes.Add(new AllowSkinnyFormationsFix(skinnyFormations));
+            /// basicFixes.Add(new AllowSkinnyFormationsFix(skinnyFormations));
             #endregion
 
             basicFixes.Add(new BouncingScrollablePanelFix(bouncingScrollablePanelFix));
@@ -207,7 +207,7 @@ namespace BasicFixes
 
         protected override void InitializeGameStarter(Game game, IGameStarter starter)
         {
-            foreach(BasicFix fix in basicFixes)
+            foreach (BasicFix fix in basicFixes)
             {
                 fix.AddCampaignBehaviors(game, starter);
             }
@@ -215,14 +215,6 @@ namespace BasicFixes
 
         public override void OnBeforeMissionBehaviorInitialize(Mission mission)
         {
-            /*
-            if (!_thing)
-            {
-                new FormationsFollow().PatchAll(HarmonyInstance);
-                _thing = true;
-            }
-            */
-
             foreach (BasicFix fix in basicFixes)
             {
                 fix.AddMissionLogics(mission);
@@ -231,8 +223,8 @@ namespace BasicFixes
 
         protected override void OnApplicationTick(float dt)
         {
-            
+
         }
     }
-    
+
 }

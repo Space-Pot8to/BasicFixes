@@ -12,6 +12,10 @@ namespace BasicFixes
 {
     public class BattleLineFix : BasicFix
     {
+        /// <summary>
+        /// Fixes for erroneous formation behaviors
+        /// </summary>
+        /// <param name="isEnabled"></param>
         public BattleLineFix(bool isEnabled) : base(isEnabled)
         {
             if (isEnabled)
@@ -116,7 +120,7 @@ namespace BasicFixes
         }
 
         /// <summary>
-        /// Problem is that units will walk to their formation position whe the formation wants them 
+        /// Problem is that units will walk to their formation position when the formation wants them 
         /// to hold up their shields. This patch makes units that haven't arrived at their position 
         /// in the formation run.
         /// </summary>
@@ -156,7 +160,7 @@ namespace BasicFixes
         /// <summary>
         /// Problem is that units will walk to their formation position when that formation tells them 
         /// to hold up their shields. I consider this a bug, because in my experience the fact that 
-        /// they have their shields up makes them more vulnerable thatn if they just ran with their 
+        /// they have their shields up makes them more vulnerable than if they just ran with their 
         /// shields down. This patch makes units which haven't arrived at their position in formation 
         /// not block with shields.
         /// </summary>
@@ -189,190 +193,6 @@ namespace BasicFixes
                 }
 
                 return true;
-            }
-        }
-    }
-
-    /// <summary>
-    /// It's stupid that when you tell all formations to follow you that they all collapse to the 
-    /// same point. They should follow with respect to other formations as well.
-    /// </summary>
-    [HarmonyPatch]
-    public class PatchToMakeArmyFollowInFormation : SimpleHarmonyPatch
-    {
-        public Agent Agent { get; set; }
-        public override MethodBase TargetMethod
-        {
-            get
-            {
-                return AccessTools.FirstMethod(typeof(MovementOrder), x => x.Name == "GetPositionAuxFollow");
-            }
-        }
-
-        public override string PatchType { get { return "Prefix"; } }
-
-        public static void Prefix(MovementOrder __instance, Formation f)
-        {
-            
-        }
-    }
-
-    [HarmonyPatch]
-    public class PatchToMakeArmyFollowInFormation2 : SimpleHarmonyPatch
-    {
-        //public MovementOrder OriginalOrder;
-            
-        public static PatchToMakeArmyFollowInFormation2 Instance { get; private set; }
-
-        public PatchToMakeArmyFollowInFormation2()
-        {
-            Instance = this;
-            //OriginalOrder = default(MovementOrder);
-        }
-
-        public override MethodBase TargetMethod
-        {
-            get
-            {
-                return AccessTools.FirstMethod(typeof(MovementOrder), x => x.Name == "OnApply");
-            }
-        }
-
-        public override string PatchType { get { return "Prefix"; } }
-
-        public static void Prefix(Formation formation)
-        {
-            //if (input.OrderEnum == MovementOrder.MovementOrderEnum.Follow) 
-            //{
-                //Instance.OriginalOrder = input;
-                //Agent agent = input._targetAgent;
-               // agent.TeleportToPosition(new Vec3(__instance.Direction * 2f + __instance.GetMiddleFrontUnitPositionOffset() + __instance.CurrentPosition));
-                //MovementOrder order = MovementOrder.MovementOrderFollow(agent);
-                //input = order;
-
-                /*
-                object boxed = input;
-                PropertyInfo fieldInfo1 = input.GetType().GetProperty("_targetAgent");
-
-                // create a ghost agent witha  different position
-
-                fieldInfo1.SetValue(boxed, formation.Width);
-                input = (FormOrder)boxed;
-                */
-            //}
-        }
-    }
-
-    public class FormationsFollow : BasicFix
-    {
-        public FormationsFollow() : base(true)
-        {
-            base.SimpleHarmonyPatches.Add(new PatchToMakeArmyFollowInFormation3());
-            base.SimpleHarmonyPatches.Add(new PatchToMakeArmyFollowInFormation4());
-            base.SimpleHarmonyPatches.Add(new SelectedFormations());
-        }
-
-        [HarmonyPatch]
-        public class SelectedFormations : SimpleHarmonyPatch
-        {
-            public static Vec2 CenterPos;
-
-            public override MethodBase TargetMethod
-            {
-                get
-                {
-                    return AccessTools.FirstMethod(typeof(OrderController), x => x.Name == "SetOrderWithAgent");
-                }
-            }
-
-            public override string PatchType { get { return "Prefix"; } }
-
-            public static void Prefix(OrderController __instance, OrderType orderType, Agent agent)
-            {
-                if (agent != null
-                    && agent.IsMainAgent
-                    && orderType == OrderType.FollowMe
-                    && __instance.Team != null 
-                    && __instance.Team.Leader != null)
-                {
-                    CenterPos = Vec2.Zero;
-                    Formation leadFormation = __instance.Team.Leader.Formation;
-                    List<Formation> otherFormations = __instance.SelectedFormations.Where(x => x != leadFormation).ToList();
-                    if (otherFormations.Count == 0)
-                        return;
-
-                    int count = 0;
-                    foreach (Formation formation in otherFormations)
-                    {
-                        CenterPos += formation.CurrentPosition;
-                        count++;
-                    }
-
-                    CenterPos /= count;
-                }
-                else
-                    CenterPos = Vec2.Invalid;
-            }
-        }
-
-        [HarmonyPatch]
-        public class PatchToMakeArmyFollowInFormation3 : SimpleHarmonyPatch
-        {
-            public static Vec3 state;
-
-            public override MethodBase TargetMethod
-            {
-                get
-                {
-                    return AccessTools.FirstMethod(typeof(Formation), x => x.Name == "SetMovementOrder");
-                }
-            }
-
-            public override string PatchType { get { return "Prefix"; } }
-
-            public static void Prefix(Formation __instance, ref MovementOrder input)
-            {
-                if (__instance.Team != null 
-                    && __instance.Team.Leader != null
-                    && __instance.Team.Leader.IsMainAgent
-                    && input.OrderType == OrderType.FollowMe
-                    && SelectedFormations.CenterPos.IsValid)
-                {
-                    state = new Vec3(input._targetAgent.Position);
-
-                    Vec2 diff = __instance.Team.Leader.Position.AsVec2 - SelectedFormations.CenterPos;
-                    Vec3 ghostPos = new Vec3(__instance.CurrentPosition + 0f * diff);
-
-                    input._targetAgent.TeleportToPosition(ghostPos);
-
-                    // input = MovementOrder.MovementOrderFollow(input._targetAgent);
-                }
-                else
-                    state = Vec3.Invalid;
-            }
-        }
-
-        [HarmonyPatch]
-        public class PatchToMakeArmyFollowInFormation4 : SimpleHarmonyPatch
-        {
-            public override MethodBase TargetMethod
-            {
-                get
-                {
-                    return AccessTools.FirstMethod(typeof(Formation), x => x.Name == "SetMovementOrder");
-                }
-            }
-
-            public override string PatchType { get { return "Postfix"; } }
-
-            public static void Postfix(Formation __instance, MovementOrder input)
-            {
-                if (PatchToMakeArmyFollowInFormation3.state.IsValid)
-                {
-                    input._targetAgent.TeleportToPosition(PatchToMakeArmyFollowInFormation3.state);
-                    PatchToMakeArmyFollowInFormation3.state = Vec3.Invalid;
-                    SelectedFormations.CenterPos = Vec2.Invalid;
-                }
             }
         }
     }

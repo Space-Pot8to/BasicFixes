@@ -11,6 +11,10 @@ using TaleWorlds.Library;
 
 namespace BasicFixes
 {
+    /// <summary>
+    /// Fix for overburdened AI parties taking on too much looted food.
+    /// </summary>
+    /** Fixed on e1.8.1
     public class DiscardExcessiveFoodFix : BasicFix
     {
         public DiscardExcessiveFoodFix(bool isEnabled) : base(isEnabled)
@@ -43,7 +47,9 @@ namespace BasicFixes
             public override void RegisterEvents()
             {
                 CampaignEvents.HourlyTickPartyEvent.AddNonSerializedListener(this, new Action<MobileParty>(this.HourlyTickPartyEvent));
-                CampaignEvents.DistributeLootToPartyEvent.AddNonSerializedListener(this, new Action<MapEvent, PartyBase, Dictionary<PartyBase, ItemRoster>>(this.DistributeLootToPartyEvent));
+                #if false
+                    CampaignEvents.DistributeLootToPartyEvent.AddNonSerializedListener(this, new Action<MapEvent, PartyBase, Dictionary<PartyBase, ItemRoster>>(this.DistributeLootToPartyEvent));
+                #endif
             }
 
             public override void SyncData(IDataStore dataStore)
@@ -139,4 +145,5 @@ namespace BasicFixes
             }
         }
     }
+    */
 }

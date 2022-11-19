@@ -11,6 +11,12 @@ using TaleWorlds.Library;
 
 namespace BasicFixes
 {
+    /// <summary>
+    /// Idea is to allow formations to be arbitrarily thin. Doing this is fine for the player, but 
+    /// causes a problem for the AI when MinimumFileCount is set to 1 where performance suffers 
+    /// when AI tries to fit a long, thin formation into too little space. 
+    /// </summary>
+    /**
     public class AllowSkinnyFormationsFix : BasicFix
     {
         public AllowSkinnyFormationsFix(bool isEnabled) : base(isEnabled)
@@ -42,6 +48,7 @@ namespace BasicFixes
             }
         }
     }
+    */
 
     /// <summary>
     /// Problem as describe here https://forums.taleworlds.com/index.php?threads/loose-formation-bug.449051/
@@ -117,6 +124,8 @@ namespace BasicFixes
         /// <summary>
         /// I forget what this is supposed to do...
         /// </summary>
+        /// 
+        /**
         [HarmonyPatch]
         public class OrderController_DecreaseUnitSpacingAndWidthIfNotAllUnitsFit_Patch : SimpleHarmonyPatch
         {
@@ -142,5 +151,6 @@ namespace BasicFixes
                 }
             }
         }
+        */
     }
 }
